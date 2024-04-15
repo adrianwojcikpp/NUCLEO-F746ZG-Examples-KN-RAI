@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -60,6 +61,9 @@ LEDS_TypeDef leds[] = {
   { .Id = "LDRON",  .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_SET },
   { .Id = "LDROFF", .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_RESET }
 };
+
+_Bool VarTim4 = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +74,18 @@ int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+/**
+  * @brief  Period elapsed callback in non-blocking mode
+  * @param  htim TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if(htim == &htim4)
+  {
+    VarTim4 ^= 1;
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -103,8 +118,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
+  HAL_TIM_Base_Start_IT(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
