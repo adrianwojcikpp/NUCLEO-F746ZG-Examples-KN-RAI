@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,16 +90,33 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  unsigned int rx_n = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    while(Serial_readCString(rx_buffer, rx_buffer_len) == 0);
+    while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
     // Do smthing with rx_buffer
+    if(strncmp(rx_buffer, "LDGON" , rx_n) == 0)
+      HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+
+    else if(strncmp(rx_buffer, "LDGOFF" , rx_n) == 0)
+          HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
+
+    else if(strncmp(rx_buffer, "LDBON" , rx_n) == 0)
+      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+
+    else if(strncmp(rx_buffer, "LDBOFF" , rx_n) == 0)
+          HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+    else if(strncmp(rx_buffer, "LDRON" , rx_n) == 0)
+      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+
+    else if(strncmp(rx_buffer, "LDROFF" , rx_n) == 0)
+          HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 
     /* USER CODE END WHILE */
 
