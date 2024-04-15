@@ -33,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define __RX_BUFFER_LEN 1024
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,13 +44,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char rx_buffer[__RX_BUFFER_LEN];
+const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -96,8 +97,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(100);
+    while(Serial_readCString(rx_buffer, rx_buffer_len) == 0);
+
+    // Do smthing with rx_buffer
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -162,7 +165,10 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len)
+{
+  return 0;
+}
 /* USER CODE END 4 */
 
 /**
