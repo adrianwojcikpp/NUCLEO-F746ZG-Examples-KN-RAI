@@ -182,18 +182,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len)
-{
-  unsigned int rx_i = 0;
-  unsigned char rx_tmp;
-  while(HAL_UART_Receive(&huart3, &rx_tmp, sizeof(unsigned char), 10) == HAL_OK)
-  {
-    rx_buffer[rx_i] = rx_tmp;
-    rx_buffer[rx_i+1] = '\0';
-    rx_i = (rx_i+1) % (rx_buffer_len-1);
-  }
-  return rx_i;
-}
+
 /* USER CODE END 4 */
 
 /**
