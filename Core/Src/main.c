@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -121,7 +122,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
-  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,11 +131,16 @@ int main(void)
   {
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
+    /*
     for(int i = 0; i < sizeof(leds)/sizeof(leds[0]); i++)
     {
       if(strncmp(rx_buffer, leds[i].Id , rx_n) == 0)
         HAL_GPIO_WritePin(leds[i].Port, leds[i].Pin, leds[i].State);
     }
+    */
+
+    float voltage = strtof(rx_buffer, NULL);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, (voltage / 3.3f)*100);
 
     /* USER CODE END WHILE */
 
