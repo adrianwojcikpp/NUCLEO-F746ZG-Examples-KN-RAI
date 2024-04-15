@@ -28,7 +28,12 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct {
+  char* Id;
+  GPIO_TypeDef* Port;
+  uint16_t Pin;
+  GPIO_PinState State;
+} LEDS_TypeDef;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -46,6 +51,15 @@
 /* USER CODE BEGIN PV */
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
+
+LEDS_TypeDef leds[] = {
+  { .Id = "LDGON",  .Port = LD1_GPIO_Port, .Pin = LD1_Pin, .State = GPIO_PIN_SET },
+  { .Id = "LDGOFF", .Port = LD1_GPIO_Port, .Pin = LD1_Pin, .State = GPIO_PIN_RESET },
+  { .Id = "LDBON",  .Port = LD2_GPIO_Port, .Pin = LD2_Pin, .State = GPIO_PIN_SET },
+  { .Id = "LDBOFF", .Port = LD2_GPIO_Port, .Pin = LD2_Pin, .State = GPIO_PIN_RESET },
+  { .Id = "LDRON",  .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_SET },
+  { .Id = "LDROFF", .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_RESET }
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,24 +113,11 @@ int main(void)
   {
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
-    // Do smthing with rx_buffer
-    if(strncmp(rx_buffer, "LDGON" , rx_n) == 0)
-      HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
-
-    else if(strncmp(rx_buffer, "LDGOFF" , rx_n) == 0)
-          HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
-
-    else if(strncmp(rx_buffer, "LDBON" , rx_n) == 0)
-      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-
-    else if(strncmp(rx_buffer, "LDBOFF" , rx_n) == 0)
-          HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-
-    else if(strncmp(rx_buffer, "LDRON" , rx_n) == 0)
-      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-
-    else if(strncmp(rx_buffer, "LDROFF" , rx_n) == 0)
-          HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+    for(int i = 0; i < sizeof(leds)/sizeof(leds[0]); i++)
+    {
+      if(strncmp(rx_buffer, leds[i].Id , rx_n) == 0)
+        HAL_GPIO_WritePin(leds[i].Port, leds[i].Pin, leds[i].State);
+    }
 
     /* USER CODE END WHILE */
 
