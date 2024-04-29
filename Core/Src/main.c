@@ -26,16 +26,12 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdlib.h>
+#include "l298n_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct {
-  char* Id;
-  GPIO_TypeDef* Port;
-  uint16_t Pin;
-  GPIO_PinState State;
-} LEDS_TypeDef;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -54,16 +50,6 @@ typedef struct {
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
 
-LEDS_TypeDef leds[] = {
-  { .Id = "LDGON",  .Port = LD1_GPIO_Port, .Pin = LD1_Pin, .State = GPIO_PIN_SET },
-  { .Id = "LDGOFF", .Port = LD1_GPIO_Port, .Pin = LD1_Pin, .State = GPIO_PIN_RESET },
-  { .Id = "LDBON",  .Port = LD2_GPIO_Port, .Pin = LD2_Pin, .State = GPIO_PIN_SET },
-  { .Id = "LDBOFF", .Port = LD2_GPIO_Port, .Pin = LD2_Pin, .State = GPIO_PIN_RESET },
-  { .Id = "LDRON",  .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_SET },
-  { .Id = "LDROFF", .Port = LD3_GPIO_Port, .Pin = LD3_Pin, .State = GPIO_PIN_RESET }
-};
-
-_Bool VarTim4 = 0;
 
 /* USER CODE END PV */
 
@@ -75,18 +61,7 @@ int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/**
-  * @brief  Period elapsed callback in non-blocking mode
-  * @param  htim TIM handle
-  * @retval None
-  */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if(htim == &htim4)
-  {
-    VarTim4 ^= 1;
-  }
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -122,7 +97,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+  L298N_Init(&hdrive);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,17 +106,8 @@ int main(void)
   {
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
-    /*
-    for(int i = 0; i < sizeof(leds)/sizeof(leds[0]); i++)
-    {
-      if(strncmp(rx_buffer, leds[i].Id , rx_n) == 0)
-        HAL_GPIO_WritePin(leds[i].Port, leds[i].Pin, leds[i].State);
-    }
-    */
-
-    float voltage = strtof(rx_buffer, NULL);
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, (voltage / 3.3f)*100);
-
+    float duty = strtof(rx_buffer, NULL);
+    L298N_WriteDuty(&hdrive, 0, 0, duty);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
