@@ -111,7 +111,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_ADC_Start_DMA(&hadc1, adc_data, __ADC_DATA_LEN);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, __ADC_DATA_LEN);
     HAL_Delay(10);
 
     /*
