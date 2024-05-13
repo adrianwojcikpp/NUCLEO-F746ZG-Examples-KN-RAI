@@ -53,7 +53,7 @@
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
 uint16_t adc_data[__ADC_DATA_LEN];
-
+float adc_voltage[__ADC_DATA_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,7 +64,20 @@ int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+/**
+  * @brief  Regular conversion complete callback in non blocking mode
+  * @param  hadc pointer to a ADC_HandleTypeDef structure that contains
+  *         the configuration information for the specified ADC.
+  * @retval None
+  */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  if(hadc == &hadc1)
+  {
+    for(int i = 0; i < __ADC_DATA_LEN; i++)
+      adc_voltage[i] = (float)adc_data[i];
+  }
+}
 /* USER CODE END 0 */
 
 /**
