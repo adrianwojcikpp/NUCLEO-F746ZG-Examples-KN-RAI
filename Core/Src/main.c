@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdlib.h>
+#include "aio.h"
 #include "l298n_config.h"
 /* USER CODE END Includes */
 
@@ -39,7 +40,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define __RX_BUFFER_LEN 1024
-#define __ADC_DATA_LEN 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,8 +52,8 @@
 /* USER CODE BEGIN PV */
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
-uint16_t adc_data[__ADC_DATA_LEN];
-float adc_voltage[__ADC_DATA_LEN];
+uint16_t adc_data[ADC1_NUMBER_OF_CONV];
+float x, y;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,8 +74,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   if(hadc == &hadc1)
   {
-    for(int i = 0; i < __ADC_DATA_LEN; i++)
-      adc_voltage[i] = (float)adc_data[i];
+      x = __LINEAR_TRANSFORM(adc_data[0], 0, ADC_REG_MAX, -1.0f, 1.0f);
+      y = __LINEAR_TRANSFORM(adc_data[1], 0, ADC_REG_MAX, 1.0f, -1.0f);
   }
 }
 /* USER CODE END 0 */
@@ -124,7 +124,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, __ADC_DATA_LEN);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, ADC1_NUMBER_OF_CONV);
     HAL_Delay(10);
 
     /*
