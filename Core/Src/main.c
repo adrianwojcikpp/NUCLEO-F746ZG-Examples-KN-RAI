@@ -54,7 +54,7 @@
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
 uint16_t adc_data[ADC1_NUMBER_OF_CONV];
-float x, y;
+float x, y, v;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,9 +77,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   {
       x = __LINEAR_TRANSFORM(adc_data[0], 0, ADC_REG_MAX, -1.0f, 1.0f);
       y = __LINEAR_TRANSFORM(adc_data[1], 0, ADC_REG_MAX, 1.0f, -1.0f);
+      v = __LINEAR_TRANSFORM(adc_data[2], 0, ADC_REG_MAX, 0.0f, 1.0f);
 
       char tx_buffer[128];
-      int tx_len = snprintf(tx_buffer, sizeof(tx_buffer), "{ \"x\" : %4.2f, \"y\" : %4.2f }\n", x, y);
+      int tx_len = snprintf(tx_buffer, sizeof(tx_buffer), "{ \"x\" : %4.2f, \"y\" : %4.2f, \"v\" : %4.2f}\n", x, y, v);
       HAL_UART_Transmit_IT(&huart3, (uint8_t*)tx_buffer, tx_len);
   }
 }
@@ -130,7 +131,7 @@ int main(void)
   while (1)
   {
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, ADC1_NUMBER_OF_CONV);
-    HAL_Delay(50);
+    HAL_Delay(200);
 
     /*
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
