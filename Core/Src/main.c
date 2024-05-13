@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -37,6 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define __RX_BUFFER_LEN 1024
+#define __ADC_DATA_LEN 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,7 +52,7 @@
 /* USER CODE BEGIN PV */
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
-
+uint16_t adc_data[__ADC_DATA_LEN];
 
 /* USER CODE END PV */
 
@@ -93,23 +96,32 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
+  MX_ADC1_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   L298N_Init(&hdrive);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    HAL_ADC_Start_DMA(&hadc1, adc_data, __ADC_DATA_LEN);
+    HAL_Delay(10);
+
+    /*
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
     int dir = strtol(&rx_buffer[0], NULL, 10);
     float duty = strtof(&rx_buffer[2], NULL);
     L298N_WriteDuty(&hdrive, 0, dir, duty);
+    */
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
