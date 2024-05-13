@@ -24,8 +24,8 @@
 
 /* Public variables ----------------------------------------------------------*/
 L298N_Handle_TypeDef hdrive = {
-    .ENA = PWM_INIT_HANDLE(&htim4, TIM_CHANNEL_3),
-    .ENB = PWM_INIT_HANDLE(&htim4, TIM_CHANNEL_4),
+    .ENA = PWM_INIT_HANDLE(&htim1, TIM_CHANNEL_2),
+    .ENB = PWM_INIT_HANDLE(&htim1, TIM_CHANNEL_1),
     .IN1 = DIO_INIT_HANDLE(L298N_IN1),
     .IN2 = DIO_INIT_HANDLE(L298N_IN2),
     .IN3 = DIO_INIT_HANDLE(L298N_IN3),

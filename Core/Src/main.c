@@ -94,9 +94,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  MX_TIM4_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   L298N_Init(&hdrive);
   /* USER CODE END 2 */
 
@@ -106,8 +107,9 @@ int main(void)
   {
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
-    float duty = strtof(rx_buffer, NULL);
-    L298N_WriteDuty(&hdrive, 0, 0, duty);
+    int dir = strtol(&rx_buffer[0], NULL, 10);
+    float duty = strtof(&rx_buffer[2], NULL);
+    L298N_WriteDuty(&hdrive, 0, dir, duty);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
