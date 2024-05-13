@@ -26,6 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "aio.h"
@@ -76,6 +77,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   {
       x = __LINEAR_TRANSFORM(adc_data[0], 0, ADC_REG_MAX, -1.0f, 1.0f);
       y = __LINEAR_TRANSFORM(adc_data[1], 0, ADC_REG_MAX, 1.0f, -1.0f);
+
+      char tx_buffer[128];
+      int tx_len = snprintf(tx_buffer, sizeof(tx_buffer), "{ \"x\" : %4.2f, \"y\" : %4.2f }\n", x, y);
+      HAL_UART_Transmit_IT(&huart3, (uint8_t*)tx_buffer, tx_len);
   }
 }
 /* USER CODE END 0 */
@@ -125,7 +130,7 @@ int main(void)
   while (1)
   {
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, ADC1_NUMBER_OF_CONV);
-    HAL_Delay(10);
+    HAL_Delay(50);
 
     /*
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
