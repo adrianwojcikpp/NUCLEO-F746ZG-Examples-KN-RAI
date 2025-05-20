@@ -51,8 +51,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char rx_buffer[__RX_BUFFER_LEN];
-const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
+char rxCharacter = '\0';
+float dutyAB = 0.0f;
+float dutyA = 0.0f;
+float dutyB = 0.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +103,6 @@ int main(void)
   MX_USART3_UART_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-  unsigned int rx_n = 0;
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   L298N_Init(&hdrive);
@@ -112,12 +113,52 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
+    //while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
-    int channel = strtol(&rx_buffer[0], NULL, 10);
-    int dir = strtol(&rx_buffer[2], NULL, 10);
-    float duty = strtof(&rx_buffer[4], NULL);
-    L298N_WriteDuty(&hdrive, channel, dir, duty);
+    if(HAL_UART_Receive(&huart5, (unsigned char*)&rxCharacter, sizeof(char), HAL_MAX_DELAY) == HAL_OK)
+    {
+      HAL_UART_Transmit(&huart5,(unsigned char*)&rxCharacter, sizeof(char), 10);
+      // Receive single character
+      // W -> increase duty for both motors
+      // S -> decrease duty for both motors
+      // D -> stop one motor, increase duty on second
+      // A -> stop second motor, increase duty on both
+      // Q -> stop both motors
+      switch(rxCharacter)
+      {
+      case 'w':
+        dutyA = dutyB = 0.0f;
+        dutyAB = (dutyAB < 100.0f) ? (dutyAB+10.0f) : 100.0f;
+        L298N_WriteDuty(&hdrive, 0, 0, dutyAB);
+        L298N_WriteDuty(&hdrive, 1, 0, dutyAB);
+        break;
+      case 's':
+        dutyA = dutyB = 0.0f;
+        dutyAB = (dutyAB > -100.0f) ? (dutyAB-10.0f) : -100.0f;
+        L298N_WriteDuty(&hdrive, 0, 1, -dutyAB);
+        L298N_WriteDuty(&hdrive, 1, 1, -dutyAB);
+        break;
+      case 'd':
+        dutyAB = dutyB = 0.0f;
+        dutyA = (dutyA < 100.0f) ? (dutyA+10.0f) : 100.0f;
+        L298N_WriteDuty(&hdrive, 0, 0, dutyA);
+        L298N_WriteDuty(&hdrive, 1, 0, 0);
+        break;
+      case 'a':
+        dutyAB = dutyA = 0.0f;
+        dutyB = (dutyB < 100.0f) ? (dutyB+10.0f) : 100.0f;
+        L298N_WriteDuty(&hdrive, 0, 0, 0);
+        L298N_WriteDuty(&hdrive, 1, 0, dutyB);
+        break;
+      case 'q':
+        dutyA = dutyB = dutyAB = 0.0f;
+        L298N_WriteDuty(&hdrive, 0, 0, 0);
+        L298N_WriteDuty(&hdrive, 1, 0, 0);
+        break;
+      default:
+        break;
+      }
+    }
 
     /* USER CODE END WHILE */
 
