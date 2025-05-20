@@ -53,9 +53,6 @@
 /* USER CODE BEGIN PV */
 char rx_buffer[__RX_BUFFER_LEN];
 const unsigned int rx_buffer_len = __RX_BUFFER_LEN;
-uint16_t adc_data[ADC1_NUMBER_OF_CONV];
-float x, y, v, s;
-float duty = 0.0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,26 +63,7 @@ int Serial_readCString(char* rx_buffer, unsigned int rx_buffer_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/**
-  * @brief  Regular conversion complete callback in non blocking mode
-  * @param  hadc pointer to a ADC_HandleTypeDef structure that contains
-  *         the configuration information for the specified ADC.
-  * @retval None
-  */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  if(hadc == &hadc1)
-  {
-      x = __LINEAR_TRANSFORM(adc_data[0], 0, ADC_REG_MAX, -1.0f, 1.0f);
-      y = __LINEAR_TRANSFORM(adc_data[1], 0, ADC_REG_MAX, 1.0f, -1.0f);
-      v = __LINEAR_TRANSFORM(adc_data[2], 0, ADC_REG_MAX, 0.0f, 1.0f);
-      s = __LINEAR_TRANSFORM(adc_data[3], 0, ADC_REG_MAX, 0.0f, 1.0f);
 
-      char tx_buffer[128];
-      int tx_len = snprintf(tx_buffer, sizeof(tx_buffer), "{ \"x\" : %4.2f, \"y\" : %4.2f, \"v\" : %4.2f, \"s\" : %4.2f}\n", x, y, v, s);
-      HAL_UART_Transmit_IT(&huart3, (uint8_t*)tx_buffer, tx_len);
-  }
-}
 /* USER CODE END 0 */
 
 /**
@@ -121,6 +99,7 @@ int main(void)
   MX_TIM1_Init();
   MX_ADC1_Init();
   MX_USART3_UART_Init();
+  MX_UART5_Init();
   /* USER CODE BEGIN 2 */
   unsigned int rx_n = 0;
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -133,10 +112,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    //HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_data, ADC1_NUMBER_OF_CONV);
-    //HAL_Delay(100);
-
-
     while((rx_n = Serial_readCString(rx_buffer, rx_buffer_len)) == 0);
 
     int channel = strtol(&rx_buffer[0], NULL, 10);
