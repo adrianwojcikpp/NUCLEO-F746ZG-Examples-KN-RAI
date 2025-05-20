@@ -14,7 +14,7 @@
 #include <string.h>
 
 /* Private variables ---------------------------------------------------------*/
-const UART_HandleTypeDef *serial = &huart3;
+const UART_HandleTypeDef *serial = &huart5;
 const uint16_t serial_timeout = 10; //< ms
 
 /* Public functions ----------------------------------------------------------*/
